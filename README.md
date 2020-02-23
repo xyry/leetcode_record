@@ -1,4 +1,7 @@
+[TOC]
+
 # leetcode_record
+
  leetcode做题记录
 
 目前做的是这个数组系列， https://leetcode-cn.com/tag/array/  进去后，难度选择简单，从第一个开始做。
