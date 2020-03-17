@@ -250,3 +250,173 @@ public:
 };
 ```
 
+#### [485. 最大连续1的个数](https://leetcode-cn.com/problems/max-consecutive-ones/)
+
+水题
+
+```
+class Solution {
+public:
+    int findMaxConsecutiveOnes(vector<int>& nums) {
+        int len=nums.size();
+        int cnt=0;
+        int ans=0;
+        for(int i=0;i<len;i++){
+            if(nums[i]==1){
+                cnt++;
+            }else{
+                ans=max(ans,cnt);
+                cnt=0;
+            }
+        }
+        ans=max(ans,cnt);
+        return ans;
+    }
+};
+```
+
+#### [532. 数组中的K-diff数对](https://leetcode-cn.com/problems/k-diff-pairs-in-an-array/)
+
+思路：WA了三次，第一次没考虑k=0;第二次和第三次都是特判K=0的时候想简单了，最后把K=0列出来单独处理，记录放进st2中，st2.size()不发生改变的数字，将这些数字放进st3中，最后记一下st3的大小就行
+
+顺便学会了set中有find方法，返回找到数字的指针，找不到返回st.end()。
+
+vector中没有find
+
+```c++
+class Solution {
+public:
+    int findPairs(vector<int>& nums, int k) {
+        int len=nums.size();
+        set<int> st(nums.begin(),nums.end());
+        int ans=0;
+        if(k==0){
+            set<int> st2;
+            set<int> st3;
+            // 把重复的数字放进st3,算st3.size()就知道有几种重复的数字了
+            int presize=st2.size();
+            for(int i=0;i<len;i++){
+                st2.insert(nums[i]);
+                if(st2.size()!=presize){
+                    presize=st2.size();
+                    continue;
+                }
+                st3.insert(nums[i]);
+                presize=st2.size();
+            }
+            ans=st3.size();
+        }else if(k<0) 
+            return 0;
+        else{
+            for(set<int>::iterator it=st.begin();it!=st.end();it++){
+                set<int>::iterator f=st.find(*it+k);
+                if(f!=st.end()&&f!=it) ans++;
+            }
+        }
+        
+        return ans;
+    }
+};
+```
+
+# 2020年2月24日
+
+#### [561. 数组拆分 I](https://leetcode-cn.com/problems/array-partition-i/)
+
+思路：水题，反向思考，如果要求1到n的$min(a_i,b_i)$总和最小的话，那操作就是把最小的前n个数分别放进每一对中，这样求出来的和就是最小的。如果要求总和最大，直接排个序，然后取索引为偶数的即可。也可以直接算。
+
+```c++
+class Solution {
+public:
+    int arrayPairSum(vector<int>& nums) {
+        int len=nums.size();
+        sort(nums.begin(),nums.end());
+        int ans=0;
+        for(int i=0;i<len;i+=2){
+            ans+=min(nums[i],nums[i+1]);
+        }
+        return ans;
+    }
+};
+```
+
+#### [605. 种花问题](https://leetcode-cn.com/problems/can-place-flowers/)
+
+思路：进行各种特判
+
+- 中间出现3个0可以种一朵花，5个0可以种两朵花，x个0可以种$(x-3)/2+1$朵花
+
+- 端点特判，全是0（左右端点都是0）；左端点是0；右端点是0
+
+  写的有点麻烦，WA了3次
+
+优秀的解法： **防御式编程思想：在 flowerbed 数组两端各增加一个 0， 这样处理的好处在于不用考虑边界条件，任意位置处只要连续出现三个 0 就可以栽上一棵花。** 
+
+```c++
+丑陋的代码
+class Solution {
+public:
+    bool canPlaceFlowers(vector<int>& flowerbed, int n) {
+        int len=flowerbed.size();
+        int cnt=0;
+        vector<int> vec;
+        for(int i=0;i<len;i++){
+            if(flowerbed[i]==0){
+                cnt++;
+            }else if(flowerbed[i]==1&&cnt!=0){
+                vec.push_back(cnt);
+                cnt=0;
+            }
+        }
+        if(cnt!=0) vec.push_back(cnt);
+        int sum=0;
+        for(int i=0;i<vec.size();i++){
+            int tmp;
+            if(vec.size()==1&&vec[0]==len){
+                if(len%2==0){
+                    sum+=len/2;
+                }else{
+                    sum+=(len+1)/2;
+                }
+            }
+            else if(i==0&&flowerbed[0]==0||i==vec.size()-1&&flowerbed[len-1]==0){
+                sum+=vec[i]/2;
+            }else if(vec[i]<3){
+                continue;
+            }else if(vec[i]%2==0){
+                tmp=vec[i]/3;
+                sum+=tmp;
+            }else{
+                tmp=(vec[i]-3)/2+1;
+                sum+=tmp;
+            }        
+        }
+        if(sum>=n) return true;
+        else return false;
+    }
+};
+```
+
+优雅的解法，顺便学习了auto的用法
+
+```c++
+class Solution {
+public:
+    bool canPlaceFlowers(vector<int>& flowerbed, int n) {
+        int cnt=1,ans=0;//左边补零
+        for(auto i:flowerbed){
+            if(i){
+                ans+=(cnt-1)/2;
+                cnt=0;
+            }else{
+                cnt++;
+            }
+        }
+        // 处理最后的右端点以及右端点补零
+        ans+=cnt/2;
+        return ans>=n;
+    }
+};
+
+```
+
